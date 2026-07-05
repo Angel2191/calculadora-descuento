@@ -456,7 +456,7 @@
 
 <div class="wrap">
 
-  <div class="eyebrow">Pricing &amp; Revenue Management</div>
+  <div class="eyebrow">Pricing &amp; Revenue Management · Herramienta 01</div>
   <h1>¿Cuánto más tienes que vender<br>si das ese descuento?</h1>
   <p class="subtitle">
     Antes de aprobar un descuento, calcula el volumen extra que necesitas vender
@@ -547,8 +547,8 @@
   </div>
 
   <footer>
-    <p>Hecho por <strong>[Tu nombre]</strong> · Subgerente de Pricing en seguros</p>
-    <p><a href="https://www.linkedin.com/in/tu-usuario" target="_blank" rel="noopener">Sígueme en LinkedIn →</a></p>
+    <p>Hecho por <strong>Angel Daviran Villanueva</strong> · Subgerente de Pricing en seguros</p>
+    <p><a href="https://www.linkedin.com/in/angeldaviran" target="_blank" rel="noopener">Sígueme en LinkedIn →</a></p>
   </footer>
 
 </div>
@@ -565,9 +565,9 @@
   const CONFIG = {
     // Reemplaza con tu endpoint real de Formspree, ej: "https://formspree.io/f/xayzabcd"
     FORMSPREE_ENDPOINT: "https://formspree.io/f/xpqgbzee",
-    AUTHOR_NAME: "[Tu nombre]",
+    AUTHOR_NAME: "Angel Daviran Villanueva",
     AUTHOR_ROLE: "Subgerente de Pricing en seguros",
-    LINKEDIN_URL: "https://www.linkedin.com/in/tu-usuario",
+    LINKEDIN_URL: "https://www.linkedin.com/in/angeldaviran",
   };
 
   /* =========================================================
@@ -925,7 +925,7 @@
     y += 16;
     doc.setFont('helvetica','normal');
     doc.setTextColor(140,110,50);
-    doc.textWithLink('Conectemos en LinkedIn →', 48, y, { url: CONFIG.LINKEDIN_URL });
+    doc.textWithLink('Conectemos en LinkedIn', 48, y, { url: CONFIG.LINKEDIN_URL });
 
     doc.save('cuanto-mas-vender-descuento.pdf');
   }
