@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>¿Cuánto más tienes que vender si das ese descuento? — Calculadora de Pricing</title>
+<meta name="description" content="Calcula cuánto volumen extra necesitas vender para que un descuento no te cueste utilidad. Herramienta de Pricing & Revenue Management.">
+
+<!-- Tipografías: Space Grotesk (títulos), Inter (cuerpo), IBM Plex Mono (datos/números) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #0F1D2B;
+    --bg-grid: #12213170;
+    --surface: #16283B;
+    --surface-2: #1C3149;
+    --border: #2A3D52;
+    --border-soft: #223447;
+    --text: #EAF0F2;
+    --text-muted: #8FA3B3;
+    --text-dim: #5D7285;
+    --gold: #D8B24C;
+    --gold-dim: #8C7638;
+    --safe: #5FA88F;
+    --safe-bg: #5FA88F1a;
+    --danger: #E0654A;
+    --danger-bg: #E0654A1f;
+    --focus: #7FB7A3;
+    --radius: 10px;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html{ scroll-behavior: smooth; }
+
+  body{
+    margin:0;
+    background: var(--bg);
+    background-image:
+      linear-gradient(var(--bg-grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+    background-size: 42px 42px;
+    color: var(--text);
+    font-family: var(--font-body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 56px 20px 80px;
+  }
+
+  /* ---------- Encabezado ---------- */
+  .eyebrow{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom: 18px;
+  }
+  .eyebrow::before{
+    content:"";
+    width: 18px; height: 1px;
+    background: var(--gold-dim);
+  }
+
+  h1{
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(28px, 5vw, 42px);
+    line-height: 1.12;
+    margin: 0 0 16px;
+    letter-spacing: -0.01em;
+  }
+
+  .subtitle{
+    color: var(--text-muted);
+    font-size: 16px;
+    max-width: 56ch;
+    margin: 0 0 40px;
+  }
+
+  /* ---------- Tarjeta calculadora ---------- */
+  .card{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 28px;
+  }
+
+  .inputs-row{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 560px){
+    .inputs-row{ grid-template-columns: 1fr; }
+  }
+
+  .field label{
+    display:block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .field .hint{
+    display:block;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+
+  .field .input-shell{
+    position:relative;
+    display:flex;
+    align-items:center;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .field .input-shell:focus-within{
+    border-color: var(--focus);
+    box-shadow: 0 0 0 3px #7FB7A326;
+  }
+  .field input[type="number"]{
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 13px 14px;
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    -moz-appearance: textfield;
+  }
+  .field input[type="number"]::-webkit-outer-spin-button,
+  .field input[type="number"]::-webkit-inner-spin-button{
+    -webkit-appearance: none; margin:0;
+  }
+  .field .suffix{
+    padding-right: 14px;
+    font-family: var(--font-mono);
+    color: var(--text-dim);
+    font-size: 16px;
+  }
+
+  .field-optional{
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px dashed var(--border-soft);
+  }
+  .optional-tag{
+    font-weight: 400;
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-left: 6px;
+  }
+
+  /* ---------- Resultado ---------- */
+  .result{
+    margin-top: 26px;
+    padding-top: 24px;
+    border-top: 1px dashed var(--border-soft);
+  }
+
+  .result-figure{
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: clamp(30px, 6vw, 44px);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--safe);
+  }
+  .result-figure.is-danger{ color: var(--danger); }
+
+  .result-label{
+    font-size: 15px;
+    color: var(--text);
+    margin: 4px 0 14px;
+  }
+
+  .result-concrete{
+    font-size: 14px;
+    color: var(--text);
+    background: var(--surface-2);
+    border-left: 2px solid var(--gold);
+    padding: 8px 12px;
+    margin: 0 0 14px;
+    border-radius: 0 6px 6px 0;
+  }
+  .result-concrete strong{
+    color: var(--gold);
+    font-family: var(--font-mono);
+  }
+
+  .result-secondary{
+    display:inline-flex;
+    align-items:center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+    background: var(--surface-2);
+    border: 1px solid var(--border-soft);
+    padding: 8px 12px;
+    border-radius: 20px;
+  }
+  .result-secondary strong{
+    color: var(--danger);
+    font-family: var(--font-mono);
+  }
+
+  .danger-box{
+    background: var(--danger-bg);
+    border: 1px solid #E0654A55;
+    color: var(--text);
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .danger-box strong{ color: var(--danger); }
+
+  /* ---------- Gráfico (elemento firma) ---------- */
+  .chart-card{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 28px 18px;
+    margin-bottom: 28px;
+  }
+  .chart-head h2{
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+  .chart-head p{
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0 0 18px;
+  }
+
+  svg.curve{ width: 100%; height: auto; display:block; overflow: visible; }
+  .axis-label{ font-family: var(--font-mono); font-size: 10px; fill: var(--text-dim); }
+  .axis-title{
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 600;
+    fill: var(--text-muted);
+    letter-spacing: 0.02em;
+  }
+  .curve-path{
+    fill:none;
+    stroke: var(--gold);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+  }
+  .curve-path-capped{
+    fill:none;
+    stroke: var(--gold);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-dasharray: 4 5;
+    opacity: 0.5;
+  }
+  .axis-note{
+    font-family: var(--font-body);
+    font-style: italic;
+    font-size: 9.5px;
+    fill: var(--text-dim);
+  }
+  .danger-zone{ fill: var(--danger); opacity: 0.08; }
+  .margin-line{ stroke: var(--text-dim); stroke-width: 1; stroke-dasharray: 3 4; }
+  .grid-line{ stroke: var(--border-soft); stroke-width: 1; }
+  .marker-dot{ fill: var(--bg); stroke: var(--gold); stroke-width: 3; }
+  .marker-dot.is-danger{ stroke: var(--danger); }
+  .marker-label{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    fill: var(--text);
+  }
+
+  @media (prefers-reduced-motion: no-preference){
+    .curve-path{ transition: stroke-dashoffset 1.1s cubic-bezier(.16,.84,.44,1); }
+  }
+
+  /* ---------- Tabla de escenarios ---------- */
+  .table-card{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 28px;
+  }
+  .table-card h2{
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+  .table-card > p{
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0 0 18px;
+  }
+
+  table{ width:100%; border-collapse: collapse; }
+  thead th{
+    text-align:left;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-weight: 600;
+    padding: 0 10px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody td{
+    padding: 13px 10px;
+    border-bottom: 1px solid var(--border-soft);
+    font-size: 14px;
+    vertical-align: middle;
+  }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr.is-user-row{ background: var(--surface-2); }
+  tbody tr.is-user-row td:first-child{ position:relative; }
+  tbody tr.is-user-row td:first-child::before{
+    content:"TU CASO";
+    position:absolute;
+    left:10px; top:-9px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    color: var(--gold);
+  }
+  td.num{ font-family: var(--font-mono); font-weight: 600; font-variant-numeric: tabular-nums; }
+  td.num.danger{ color: var(--danger); }
+  td.num.safe{ color: var(--safe); }
+  td.muted{ color: var(--text-muted); font-size: 13px; }
+
+  /* ---------- CTA / captura de correo ---------- */
+  .cta-card{
+    background: linear-gradient(160deg, var(--surface-2), var(--surface));
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 36px;
+  }
+  .cta-card h2{
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-weight: 600;
+    margin: 0 0 6px;
+  }
+  .cta-card p{
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 0 0 20px;
+    max-width: 50ch;
+  }
+
+  .cta-form{ display:flex; gap: 10px; flex-wrap: wrap; }
+  .cta-form .input-shell{
+    flex:1 1 220px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .cta-form input[type="email"]{
+    width:100%;
+    background: transparent;
+    border:none;
+    outline:none;
+    padding: 13px 14px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+  }
+  .cta-form .input-shell:focus-within{
+    border-color: var(--focus);
+    box-shadow: 0 0 0 3px #7FB7A326;
+  }
+
+  button.btn{
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 14px;
+    color: #0F1D2B;
+    background: var(--gold);
+    border: none;
+    border-radius: 8px;
+    padding: 13px 20px;
+    cursor: pointer;
+    transition: transform .12s ease, filter .12s ease;
+    white-space: nowrap;
+  }
+  button.btn:hover{ filter: brightness(1.08); }
+  button.btn:active{ transform: translateY(1px); }
+  button.btn:disabled{ opacity: .6; cursor: progress; }
+  button.btn:focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .cta-micro{
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 12px;
+  }
+
+  .form-msg{
+    margin-top: 14px;
+    font-size: 13px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    display:none;
+  }
+  .form-msg.show{ display:block; }
+  .form-msg.success{ background: var(--safe-bg); color: var(--safe); border:1px solid #5FA88F55; }
+  .form-msg.error{ background: var(--danger-bg); color: var(--danger); border:1px solid #E0654A55; }
+
+  /* ---------- Footer ---------- */
+  footer{
+    text-align:center;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-soft);
+  }
+  footer p{
+    font-size: 13px;
+    color: var(--text-dim);
+    margin: 0 0 6px;
+  }
+  footer a{ color: var(--gold); text-decoration:none; }
+  footer a:hover{ text-decoration:underline; }
+
+  input:focus-visible{ outline: none; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="eyebrow">Pricing &amp; Revenue Management</div>
+  <h1>¿Cuánto más tienes que vender<br>si das ese descuento?</h1>
+  <p class="subtitle">
+    Antes de aprobar un descuento, calcula el volumen extra que necesitas vender
+    para que tu utilidad no caiga. Ingresa tu margen y el descuento que estás evaluando.
+  </p>
+
+  <!-- CALCULADORA -->
+  <div class="card">
+    <div class="inputs-row">
+      <div class="field">
+        <label for="margin">Margen actual sobre el precio de venta</label>
+        <span class="hint">Ej: vendes a 100 y tu costo es 70 → tu margen es 30%.</span>
+        <div class="input-shell">
+          <input type="number" id="margin" inputmode="decimal" value="30" min="0.1" max="99" step="0.1">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="discount">Descuento que planeas dar</label>
+        <span class="hint">El % que le vas a bajar al precio de lista.</span>
+        <div class="input-shell">
+          <input type="number" id="discount" inputmode="decimal" value="10" min="0" max="99" step="0.1">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="field field-optional">
+      <label for="volumeBase">Unidades que vendes hoy <span class="optional-tag">opcional</span></label>
+      <span class="hint">Para ver el número exacto, no solo el %. Ej: pólizas o cotizaciones al mes.</span>
+      <div class="input-shell">
+        <input type="number" id="volumeBase" inputmode="decimal" placeholder="ej. 100" min="0" step="1">
+      </div>
+    </div>
+
+    <div class="result" id="resultBlock" aria-live="polite">
+      <!-- se llena por JS -->
+    </div>
+  </div>
+
+  <!-- GRÁFICO -->
+  <div class="chart-card">
+    <div class="chart-head">
+      <h2>La curva no es lineal — por eso sorprende</h2>
+      <p>Eje horizontal: el descuento que evalúas. Eje vertical: cuánto más necesitas vender.
+      El gráfico se topa en +200% (triplicar ventas) para que se pueda leer — en la realidad,
+      la curva sigue subiendo sin límite mientras más te acercas a tu margen.</p>
+    </div>
+    <svg class="curve" id="curveSvg" viewBox="0 0 620 320" role="img" aria-label="Gráfico de volumen adicional necesario según el descuento"></svg>
+  </div>
+
+  <!-- TABLA -->
+  <div class="table-card">
+    <h2>Compara escenarios típicos</h2>
+    <p>Con tu margen actual, así cambia la exigencia de volumen según el descuento.</p>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Descuento</th>
+            <th>Volumen extra necesario</th>
+            <th>En otras palabras</th>
+          </tr>
+        </thead>
+        <tbody id="scenarioBody">
+          <!-- se llena por JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CTA / EMAIL GATE -->
+  <div class="cta-card">
+    <h2>Llévate esta tabla en PDF</h2>
+    <p>Te la mando lista para revisar con tu equipo o guardar como referencia la próxima vez que alguien pida "un descuentito".</p>
+
+    <form id="leadForm" class="cta-form">
+      <div class="input-shell">
+        <input type="email" id="leadEmail" placeholder="tu@empresa.com" required>
+      </div>
+      <!-- honeypot anti-spam (Formspree lo ignora si está vacío) -->
+      <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off">
+      <button class="btn" type="submit" id="leadSubmit">Descargar PDF</button>
+    </form>
+
+    <p class="cta-micro">Solo te pido tu correo. Sin spam — lo uso para compartir contenido sobre pricing.</p>
+    <div class="form-msg" id="formMsg"></div>
+  </div>
+
+  <footer>
+    <p>Hecho por <strong>[Tu nombre]</strong> · Subgerente de Pricing en seguros</p>
+    <p><a href="https://www.linkedin.com/in/tu-usuario" target="_blank" rel="noopener">Sígueme en LinkedIn →</a></p>
+  </footer>
+
+</div>
+
+<!-- jsPDF para generar el PDF en el navegador (sin backend) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+(function(){
+
+  /* =========================================================
+     CONFIGURACIÓN — edita esto antes de publicar
+     ========================================================= */
+  const CONFIG = {
+    // Reemplaza con tu endpoint real de Formspree, ej: "https://formspree.io/f/xayzabcd"
+    FORMSPREE_ENDPOINT: "https://formspree.io/f/xpqgbzee",
+    AUTHOR_NAME: "[Tu nombre]",
+    AUTHOR_ROLE: "Subgerente de Pricing en seguros",
+    LINKEDIN_URL: "https://www.linkedin.com/in/tu-usuario",
+  };
+
+  /* =========================================================
+     MATEMÁTICA DEL MODELO
+     Si M = margen sobre precio, d = descuento sobre precio:
+     incremento de volumen necesario (%) = d / (M - d) * 100
+     (Supone que el costo unitario no cambia con el descuento)
+     ========================================================= */
+  function incrementoVolumen(marginPct, discountPct){
+    const M = marginPct/100, d = discountPct/100;
+    if (d >= M) return null; // imposible de compensar solo con volumen
+    return (d/(M-d))*100;
+  }
+  function perdidaUtilidad(marginPct, discountPct){
+    const M = marginPct/100, d = discountPct/100;
+    return Math.min(d/M, 1) * 100; // % de utilidad que se pierde a igual volumen
+  }
+
+  const marginInput = document.getElementById('margin');
+  const discountInput = document.getElementById('discount');
+  const volumeBaseInput = document.getElementById('volumeBase');
+  const resultBlock = document.getElementById('resultBlock');
+  const scenarioBody = document.getElementById('scenarioBody');
+  const curveSvg = document.getElementById('curveSvg');
+
+  function fmt(n, decimals){
+    return n.toLocaleString('es', {minimumFractionDigits: decimals, maximumFractionDigits: decimals});
+  }
+
+  function getInputs(){
+    let M = parseFloat(marginInput.value);
+    let d = parseFloat(discountInput.value);
+    let base = parseFloat(volumeBaseInput.value);
+    if (isNaN(M) || M <= 0) M = 0.1;
+    if (isNaN(d) || d < 0) d = 0;
+    if (isNaN(base) || base <= 0) base = null; // opcional: sin número concreto si no lo llenan
+    M = Math.min(M, 99);
+    d = Math.min(d, 99);
+    return {M, d, base};
+  }
+
+  // Frase con números concretos, ej: "de 100 a 150 unidades (50 más)"
+  function fraseConcreta(base, incPct){
+    const extra = base * (incPct/100);
+    const total = base + extra;
+    const extraRound = Math.round(extra);
+    const totalRound = Math.round(total);
+    if (extraRound <= 0) return null;
+    return `Eso significa vender <strong>${extraRound}</strong> unidades más — de ${Math.round(base)} a ${totalRound}.`;
+  }
+
+  function renderResult(){
+    const {M, d, base} = getInputs();
+    const inc = incrementoVolumen(M, d);
+
+    if (inc === null){
+      resultBlock.innerHTML = `
+        <div class="danger-box">
+          <strong>Este descuento no se puede compensar solo con más volumen.</strong>
+          Con un margen de ${fmt(M,1)}% y un descuento de ${fmt(d,1)}%, estarías vendiendo
+          sin utilidad o por debajo de tu costo unitario. Ningún incremento de volumen arregla eso —
+          hay que revisar precio, costo o el propio descuento.
+        </div>`;
+    } else {
+      const perdida = perdidaUtilidad(M, d);
+      const concreta = base ? fraseConcreta(base, inc) : null;
+      resultBlock.innerHTML = `
+        <div class="result-figure">+${fmt(inc,1)}%</div>
+        <p class="result-label">de volumen adicional necesario para mantener la misma utilidad total.</p>
+        ${concreta ? `<p class="result-concrete">${concreta}</p>` : ''}
+        <div class="result-secondary">
+          Si vendes el mismo volumen de hoy, tu utilidad cae <strong>${fmt(perdida,1)}%</strong>
+        </div>`;
+    }
+    renderScenarios(M, d, base);
+    renderCurve(M, d);
+  }
+
+  /* ---------- Tabla de escenarios ---------- */
+  function renderScenarios(M, dUser, base){
+    const fixedScenarios = [5, 10, 15, 20];
+    // si el descuento del usuario no es uno de los fijos, lo agregamos como fila propia
+    const isCustom = !fixedScenarios.includes(Math.round(dUser*10)/10);
+    const rows = fixedScenarios.map(d => ({d, isUser: false}));
+    if (isCustom && dUser > 0) rows.push({d: dUser, isUser: true});
+    rows.sort((a,b) => a.d - b.d);
+
+    scenarioBody.innerHTML = rows.map(row => {
+      const inc = incrementoVolumen(M, row.d);
+      const trClass = row.isUser ? ' class="is-user-row"' : (Math.abs(row.d - dUser) < 0.05 ? ' class="is-user-row"' : '');
+      let volCell, readCell;
+      if (inc === null){
+        volCell = `<td class="num danger">No aplica</td>`;
+        readCell = `<td class="muted">Quedarías sin margen — no es viable</td>`;
+      } else {
+        const cls = inc > 60 ? 'danger' : 'safe';
+        volCell = `<td class="num ${cls}">+${fmt(inc,1)}%</td>`;
+        const readText = base
+          ? `De ${Math.round(base)} a ${Math.round(base + base*(inc/100))} unidades`
+          : `Por cada 100 unidades de hoy, ${Math.round(inc)} más`;
+        readCell = `<td class="muted">${readText}</td>`;
+      }
+      return `<tr${trClass}><td>${fmt(row.d,1)}%</td>${volCell}${readCell}</tr>`;
+    }).join('');
+  }
+
+  /* ---------- Gráfico SVG (elemento firma) ---------- */
+  function renderCurve(M, dUser){
+    const W = 620, H = 320;
+    const padL = 58, padR = 20, padT = 20, padB = 54;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+
+    const xMax = Math.max(30, Math.min(85, Math.round(M*1.35/5)*5));
+    const yMax = 200; // % de incremento, recortado visualmente
+
+    const xScale = d => padL + (d/xMax)*plotW;
+    const yScale = v => padT + plotH - (Math.min(v,yMax)/yMax)*plotH;
+
+    // curva: separamos el tramo "real" (sólido) del tramo topado en 200% (punteado),
+    // para que quede claro que el techo es solo un límite del gráfico, no de la realidad
+    const steps = 100;
+    let pathSolid = '', pathCapped = '';
+    let cappedStarted = false;
+    let lastSolidPoint = null;
+    for (let i=0;i<=steps;i++){
+      const d = xMax*i/steps;
+      const inc = incrementoVolumen(M, d);
+      const isCapped = (inc === null) || (inc >= yMax);
+      const v = isCapped ? yMax : inc;
+      const x = xScale(d), y = yScale(v);
+      if (!isCapped){
+        pathSolid += (pathSolid === '' ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
+        lastSolidPoint = {x, y};
+      } else {
+        if (!cappedStarted){
+          const start = lastSolidPoint || {x, y};
+          pathCapped += 'M' + start.x.toFixed(1) + ',' + start.y.toFixed(1) + ' ';
+          cappedStarted = true;
+        }
+        pathCapped += 'L' + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
+      }
+    }
+
+    // zona de peligro: d >= M
+    const dangerX = xScale(Math.min(M, xMax));
+    const dangerW = Math.max(0, (padL+plotW) - dangerX);
+
+    // líneas de grilla horizontales
+    let gridLines = '';
+    [0,50,100,150,200].forEach(v => {
+      const y = yScale(v);
+      gridLines += `<line class="grid-line" x1="${padL}" y1="${y}" x2="${padL+plotW}" y2="${y}"></line>`;
+      gridLines += `<text class="axis-label" x="${padL-8}" y="${y+3}" text-anchor="end">${v}%</text>`;
+    });
+
+    // eje X
+    let xLabels = '';
+    const xStep = xMax <= 40 ? 10 : 20;
+    for (let d=0; d<=xMax; d+=xStep){
+      const x = xScale(d);
+      xLabels += `<text class="axis-label" x="${x}" y="${padT+plotH+18}" text-anchor="middle">${d}%</text>`;
+    }
+
+    // títulos de los ejes: qué representa cada porcentaje
+    const xAxisTitle = `<text class="axis-title" x="${padL + plotW/2}" y="${H-8}" text-anchor="middle">Descuento sobre el precio de venta</text>`;
+    const yAxisTitle = `<text class="axis-title" x="${-(padT + plotH/2)}" y="16" text-anchor="middle" transform="rotate(-90)">Volumen adicional que necesitas vender</text>`;
+
+    // nota sobre el techo del gráfico: 200% = triplicar ventas, y de ahí sigue subiendo
+    const capNote = `
+      <text class="axis-note" x="${padL+10}" y="${padT+14}">
+        <tspan x="${padL+10}" dy="0">Techo del gráfico: +200% = triplicar ventas.</tspan>
+        <tspan x="${padL+10}" dy="12">En la realidad, la curva sigue subiendo ↑</tspan>
+      </text>`;
+
+    // marcador del usuario
+    const incUser = incrementoVolumen(M, dUser);
+    const dUserClamped = Math.min(dUser, xMax);
+    const vUser = incUser === null ? yMax : incUser;
+    const markerX = xScale(dUserClamped);
+    const markerY = yScale(vUser);
+    const isDanger = incUser === null;
+    const markerLabel = incUser === null
+      ? 'sin salida'
+      : (incUser > yMax ? `+${Math.round(incUser)}%↑` : `+${fmt(incUser,1)}%`);
+
+    curveSvg.innerHTML = `
+      <rect class="danger-zone" x="${dangerX}" y="${padT}" width="${dangerW}" height="${plotH}"></rect>
+      ${gridLines}
+      <line class="margin-line" x1="${xScale(Math.min(M,xMax))}" y1="${padT}" x2="${xScale(Math.min(M,xMax))}" y2="${padT+plotH}"></line>
+      <text class="axis-label" x="${xScale(Math.min(M,xMax))+6}" y="${padT+12}">tu margen</text>
+      ${xLabels}
+      <path class="curve-path" id="curvePath" d="${pathSolid}"></path>
+      ${pathCapped ? `<path class="curve-path-capped" d="${pathCapped}"></path>` : ''}
+      <circle class="marker-dot${isDanger ? ' is-danger' : ''}" cx="${markerX}" cy="${markerY}" r="6"></circle>
+      <text class="marker-label" x="${Math.min(markerX+10, W-70)}" y="${Math.max(markerY-10, padT+10)}">${markerLabel}</text>
+      ${xAxisTitle}
+      ${yAxisTitle}
+      ${capNote}
+    `;
+
+    // animación de dibujo (respeta prefers-reduced-motion vía CSS transition)
+    const path = document.getElementById('curvePath');
+    const len = path.getTotalLength();
+    path.style.strokeDasharray = len;
+    path.style.strokeDashoffset = len;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => { path.style.strokeDashoffset = '0'; });
+    });
+  }
+
+  marginInput.addEventListener('input', renderResult);
+  discountInput.addEventListener('input', renderResult);
+  volumeBaseInput.addEventListener('input', renderResult);
+  renderResult();
+
+  /* =========================================================
+     CAPTURA DE CORREO (Formspree) + GENERACIÓN DE PDF
+     ========================================================= */
+  const leadForm = document.getElementById('leadForm');
+  const leadSubmit = document.getElementById('leadSubmit');
+  const formMsg = document.getElementById('formMsg');
+
+  leadForm.addEventListener('submit', async function(e){
+    e.preventDefault();
+    const email = document.getElementById('leadEmail').value.trim();
+    if (!email){ return; }
+
+    formMsg.className = 'form-msg';
+    leadSubmit.disabled = true;
+    leadSubmit.textContent = 'Enviando…';
+
+    const {M, d, base} = getInputs();
+    const inc = incrementoVolumen(M, d);
+
+    const formData = new FormData(leadForm);
+    formData.set('email', email);
+    formData.set('margen', M);
+    formData.set('descuento', d);
+    formData.set('resultado', inc === null ? 'no viable' : `+${inc.toFixed(1)}%`);
+
+    try {
+      const res = await fetch(CONFIG.FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (res.ok){
+        formMsg.textContent = '¡Listo! Descargando tu PDF…';
+        formMsg.className = 'form-msg show success';
+        generatePDF(M, d, base);
+      } else {
+        throw new Error('respuesta no ok');
+      }
+    } catch(err){
+      formMsg.textContent = 'No pudimos enviar el formulario. Verifica tu conexión e intenta de nuevo.';
+      formMsg.className = 'form-msg show error';
+    } finally {
+      leadSubmit.disabled = false;
+      leadSubmit.textContent = 'Descargar PDF';
+    }
+  });
+
+  function generatePDF(M, d, base){
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({unit: 'pt', format: 'a4'});
+    const pageW = doc.internal.pageSize.getWidth();
+    let y = 56;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(140,110,50);
+    doc.text('PRICING & REVENUE MANAGEMENT', 48, y);
+    y += 26;
+
+    doc.setFontSize(20);
+    doc.setTextColor(20,30,45);
+    doc.text('¿Cuánto más tienes que vender', 48, y); y += 26;
+    doc.text('si das ese descuento?', 48, y); y += 34;
+
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(12);
+    doc.setTextColor(60,75,90);
+    doc.text(`Margen actual: ${M.toFixed(1)}%   |   Descuento evaluado: ${d.toFixed(1)}%`, 48, y);
+    y += 28;
+
+    const inc = incrementoVolumen(M, d);
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(16);
+    if (inc === null){
+      doc.setTextColor(200,70,50);
+      doc.text('Este descuento no se puede compensar solo con volumen.', 48, y);
+    } else {
+      doc.setTextColor(60,140,110);
+      doc.text(`Necesitas vender +${inc.toFixed(1)}% más en volumen`, 48, y);
+      y += 20;
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(11);
+      doc.setTextColor(90,105,120);
+      doc.text('para mantener la misma utilidad total.', 48, y);
+      if (base){
+        const extra = Math.round(base * (inc/100));
+        const total = Math.round(base + base*(inc/100));
+        y += 18;
+        doc.setFont('helvetica','bold');
+        doc.setTextColor(20,30,45);
+        doc.text(`Concretamente: de ${Math.round(base)} a ${total} unidades (${extra} más).`, 48, y);
+      }
+    }
+    y += 40;
+
+    doc.setDrawColor(220,225,230);
+    doc.line(48, y, pageW-48, y);
+    y += 26;
+
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(13);
+    doc.setTextColor(20,30,45);
+    doc.text('Comparación de escenarios', 48, y);
+    y += 22;
+
+    const scenarios = [5,10,15,20];
+    doc.setFontSize(11);
+    scenarios.forEach(sd => {
+      const si = incrementoVolumen(M, sd);
+      doc.setFont('helvetica','bold');
+      doc.setTextColor(20,30,45);
+      doc.text(`${sd}% de descuento`, 60, y);
+      doc.setFont('helvetica','normal');
+      if (si === null){
+        doc.setTextColor(200,70,50);
+        doc.text('No viable — quedarías sin margen', 220, y);
+      } else {
+        doc.setTextColor(60,140,110);
+        doc.text(`+${si.toFixed(1)}% de volumen necesario`, 220, y);
+      }
+      y += 22;
+    });
+
+    y += 20;
+    doc.setDrawColor(220,225,230);
+    doc.line(48, y, pageW-48, y);
+    y += 24;
+
+    doc.setFont('helvetica','italic');
+    doc.setFontSize(10);
+    doc.setTextColor(120,130,140);
+    doc.text('Supuesto: el costo unitario no cambia con el descuento otorgado.', 48, y);
+    y += 30;
+
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(11);
+    doc.setTextColor(20,30,45);
+    doc.text(CONFIG.AUTHOR_NAME + ' · ' + CONFIG.AUTHOR_ROLE, 48, y);
+    y += 16;
+    doc.setFont('helvetica','normal');
+    doc.setTextColor(140,110,50);
+    doc.textWithLink('Conectemos en LinkedIn →', 48, y, { url: CONFIG.LINKEDIN_URL });
+
+    doc.save('cuanto-mas-vender-descuento.pdf');
+  }
+
+})();
+</script>
+
+</body>
+</html>
